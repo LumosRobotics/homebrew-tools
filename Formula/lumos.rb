@@ -14,18 +14,9 @@ class Lumos < Formula
     # Install CLI entrypoint
     bin.install "bin/lumos"
 
-    # Install everything else into libexec to avoid polluting /usr/local
-    libexec.install Dir["share"]
-
-    # Optional: create wrapper scripts for ARM toolchains
-    toolchain_path = "#{libexec}/share/lumos/src/toolchains/gcc-arm-none-eabi-10.3-2021.10/bin"
-
-    Dir["#{toolchain_path}/*"].each do |tool|
-      next unless File.executable?(tool)
-
-      toolname = File.basename(tool)
-      (bin/toolname).write_env_script tool, PATH: "#{toolchain_path}:$PATH"
-    end
+    # Install to share/lumos so the binary can find it via relative path
+    # The lumos binary expects: {parent_of_bin}/share/lumos/src/toolchains/...
+    (share/"lumos").install Dir["share/lumos/*"]
   end
 
   test do
